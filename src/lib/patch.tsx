@@ -11,8 +11,16 @@ export type Patch = {
   bassTracks: number[][];
   useKick: boolean;
   tone: string;
-  mute?: boolean;
+  mute: boolean;
+  life: boolean;
+  lifetime: Lifetime;
 };
+
+export enum Lifetime {
+  WHOLE = "whole",
+  HALF = "half",
+  QUARTER = "quarter"
+}
 
 export type Action =
   | { type: "setScale"; scale: number[] }
@@ -21,7 +29,9 @@ export type Action =
   | { type: "setBassTracks"; tracks: number[][] }
   | { type: "setTone"; tone: string }
   | { type: "setUseKick"; useKick: boolean }
-  | { type: "setMute"; mute: boolean };
+  | { type: "setMute"; mute: boolean }
+  | { type: "setLife"; life: boolean }
+  | { type: "setLifetime"; lifetime: Lifetime };
 
 export const patchReducer: Reducer<Patch, Action> = (patch, action) => {
   switch (action.type) {
@@ -39,6 +49,10 @@ export const patchReducer: Reducer<Patch, Action> = (patch, action) => {
       return { ...patch, useKick: action.useKick };
     case "setMute":
       return { ...patch, mute: action.mute };
+    case "setLife":
+      return { ...patch, life: action.life };
+    case "setLifetime":
+      return { ...patch, lifetime: action.lifetime };
     default:
       throw new Error(
         `Tried to perform ${action}, which is not a valid action`,
@@ -90,6 +104,13 @@ export const getUrlState = () => {
     if (presetParams.length > 0) {
       state.tone = presetParams[0];
     }
+
+    const lifeParams = p.getAll("life");
+    if (lifeParams.length > 0) {
+      state.useKick = Boolean(Number(lifeParams[0]));
+    }
+
+
     return state;
   } catch (e) {
     console.log("Recall failed:", e);
