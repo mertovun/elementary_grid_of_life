@@ -107,9 +107,13 @@ export const getUrlState = () => {
 
     const lifeParams = p.getAll("life");
     if (lifeParams.length > 0) {
-      state.useKick = Boolean(Number(lifeParams[0]));
+      state.life = Boolean(Number(lifeParams[0]));
     }
 
+    const lifetimeParams = p.getAll("lifetime");
+    if (lifetimeParams.length > 0) {
+      state.lifetime = lifetimeParams[0] as Lifetime;
+    }
 
     return state;
   } catch (e) {
@@ -191,6 +195,8 @@ export const encodeUrlParams = (patch: Patch) => {
   let out = "?";
   out += "&kick=" + (patch.useKick ? 1 : 0);
   out += "&tone=" + patch.tone;
+  out += "&life=" + (patch.life ? 1 : 0);
+  out += "&lifetime=" + patch.lifetime;
   out += "&bassTracks=" + encodeBassTracks(patch.bassTracks);
   out += "&tracks=" + encodeTracks(patch.tracks).join("-");
   return out;
