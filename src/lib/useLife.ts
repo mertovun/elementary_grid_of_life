@@ -3,7 +3,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import PlaybackContext, { BpmContext } from "./PlaybackContext";
 import useAnimationFrame from "./useAnimationFrame";
 import { clamp, deepCopy, range } from "./utils";
-import { Patch } from "./patch";
+import { Lifetime } from "./patch";
 
 const getNeighbors = (x: number, y: number, field: number[][]) => {
   const maxX = field[0].length;
@@ -47,17 +47,18 @@ const doLife = (field: number[][], col?: number) => {
 type Props = {
   field: number[][];
   setField: (field: number[][]) => void;
-  patch: Patch
+  life: boolean;
+  lifetime: Lifetime
 };
 
-const useLife = ({ field, setField, patch }: Props) => {
+const useLife = ({ field, setField, life, lifetime }: Props) => {
   const nextField = useRef<number[][]>(deepCopy(field));
   const { bpm } = useContext(BpmContext);
   const pbCtx = useContext(PlaybackContext);
   const [lastCol, setLastCol] = useState<number>(0);
 
 
-  const refreshRate = patch.life ? 1000 / (bpm / 8) : 1000;
+  const refreshRate = life ? 1000 / (bpm / 8) : 1000;
   useAnimationFrame(refreshRate, "life");
 
   const doRefresh = useCallback(() => {
@@ -74,11 +75,11 @@ const useLife = ({ field, setField, patch }: Props) => {
   }, [field, pbCtx.playheadPos, setField]);
 
   useEffect(() => {
-    if (lastCol === pbCtx.playheadPos || !patch.life) {
+    if (lastCol === pbCtx.playheadPos || !life) {
       return;
     }
     doRefresh();
-  }, [doRefresh, lastCol, pbCtx.playheadPos, patch.life]);
+  }, [doRefresh, lastCol, pbCtx.playheadPos, life]);
 };
 
 export default useLife;
