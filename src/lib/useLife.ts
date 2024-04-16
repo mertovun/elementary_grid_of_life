@@ -2,46 +2,42 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import PlaybackContext, { BpmContext } from "./PlaybackContext";
 import useAnimationFrame from "./useAnimationFrame";
-import { clamp, deepCopy, range } from "./utils";
+import { deepCopy, range } from "./utils";
 import { Lifetime } from "./patch";
 
-const getNeighbors = (x: number, y: number, field: number[][]) => {
-  const maxX = field[0].length;
-  const maxY = field.length;
-  const [loX, hiX] = [clamp(x - 1, 0, maxX), clamp(x + 2, 0, maxX)];
-  const [loY, hiY] = [clamp(y - 1, 0, maxY), clamp(y + 2, 0, maxY)];
-
-  return range(hiY - loY, loY)
-    .map((row) => range(hiX - loX, loX).map((col) => field[row][col]))
-    .filter((row, rowindex) =>
-      row.filter((col, colindex) => !(rowindex === y && colindex === x)),
-    );
-};
-
-const calcCell = (x: number, y: number, field: number[][]) => {
-  const cell = field[y][x];
-  const adjacent = getNeighbors(x, y, field);
-  const liveAdjacent = adjacent.flat().filter((cell) => cell !== 0);
-
-  if (cell !== 0) {
-    if (liveAdjacent.length === 2 || liveAdjacent.length === 3) return cell;
-  } else {
-    if (liveAdjacent.length === 3) return 1;
-  }
-  return 0;
-};
-
-const doLife = (field: number[][], col?: number) => {
-  range(field.length).forEach((row) => {
-    if (col) {
-      field[row][col] = calcCell(col, row, field);
-    } else {
-      range(field[0].length).forEach((col) => {
-        field[row][col] = calcCell(col, row, field);
-      });
-    }
+function getAliveNeighborsAt(x: number, y: number, field: number[][]) {
+  let count = 0;
+  
+  [-1, 0, 1].forEach(dy => {
+    [-1, 0, 1].forEach(dx => {
+      if (dx === 0 && dy === 0) return;
+      
+      let nx = x + dx, ny = y + dy;
+      if (ny >= 0 && ny < field.length && nx >= 0 && nx < field[ny].length) {
+        count += field[ny][nx];
+      }
+    });
   });
-  return field;
+
+  return count;
+}
+
+const doLife = (field: number[][]) => {
+  let newField: number[][] = new Array(field.length).fill(null).map(() => new Array(field[0].length).fill(0));
+
+  field.forEach((row, y) => {
+    row.forEach((cell, x) => {
+      const aliveNeighbors = getAliveNeighborsAt(x, y, field);
+      
+      if (cell === 1) {
+        newField[y][x] = aliveNeighbors === 2 || aliveNeighbors === 3 ? 1 : 0;
+      } else {
+        newField[y][x] = aliveNeighbors === 3 ? 1 : 0;
+      }
+    });
+  });
+
+  return newField;
 };
 
 type Props = {
@@ -51,35 +47,44 @@ type Props = {
   lifetime: Lifetime
 };
 
+function noteLength(lifetime: Lifetime): number {
+  switch (lifetime) {
+    case Lifetime.WHOLE:
+      return 16;
+    case Lifetime.HALF:
+      return 8;
+    case Lifetime.QUARTER:
+      return 4;
+    default:
+      return 16;
+  }
+}
+
 const useLife = ({ field, setField, life, lifetime }: Props) => {
   const nextField = useRef<number[][]>(deepCopy(field));
   const { bpm } = useContext(BpmContext);
-  const pbCtx = useContext(PlaybackContext);
+  const { playheadPos } = useContext(PlaybackContext);
   const [lastCol, setLastCol] = useState<number>(0);
+  const [updateReady, setUpdateReady] = useState<boolean>(false);
 
-
-  const refreshRate = life ? 1000 / (bpm / 8) : 1000;
+  const refreshRate = life ? 60 * 1000 / (bpm * 8) : 1000;
   useAnimationFrame(refreshRate, "life");
 
   const doRefresh = useCallback(() => {
-    const col = pbCtx.playheadPos;
-    const outField = deepCopy(field);
-    range(field.length).forEach((y) => {
-      outField[y][col] = nextField.current[y][col];
-    });
-
-    nextField.current = doLife(deepCopy(field));
-
-    setField(outField);
-    setLastCol(col);
-  }, [field, pbCtx.playheadPos, setField]);
+    if (lastCol !== playheadPos) {
+      setLastCol(playheadPos);
+      setUpdateReady(true);
+    }
+  }, [ playheadPos, updateReady, setUpdateReady]);
 
   useEffect(() => {
-    if (lastCol === pbCtx.playheadPos || !life) {
-      return;
-    }
     doRefresh();
-  }, [doRefresh, lastCol, pbCtx.playheadPos, life]);
+    if (Math.round(lastCol) % noteLength(lifetime) !== 0 || !life || !updateReady) return;
+    nextField.current = doLife(deepCopy(field));
+    setField(nextField.current);
+    setUpdateReady(false);
+  }, [field, setField, doRefresh, life, updateReady, setUpdateReady, lifetime, noteLength]);
 };
+
 
 export default useLife;
