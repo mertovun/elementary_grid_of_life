@@ -2,7 +2,7 @@
   "name": "elementary_grid",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://teetow.github.io/elementary_grid",
+  "homepage": "https://mertovun.github.io/elementary_grid_of_life",
   "dependencies": {
     "@elemaudio/core": "^3.0.0",
     "@elemaudio/web-renderer": "^3.0.1",

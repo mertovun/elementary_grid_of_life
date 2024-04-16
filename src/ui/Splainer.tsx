@@ -7,10 +7,11 @@ const Splainer = () => {
         Made with <a href="https://www.elementary.audio/">Elementary Audio</a>
       </span>
       <span>
-        <a href="https://github.com/teetow/elementary_grid">GitHub</a>
+        Elementary Grid of Life: (<a href="https://github.com/mertovun/elementary_grid_of_life">Github</a>)
       </span>
       <span>
-        My <a href="https://soundcloud.com/teetow">SoundCloud</a>
+        A fork of Teetow's <a href="https://github.com/teetow/elementary_grid">Elementary Grid</a>
+        Teetow's <a href="https://soundcloud.com/teetow">SoundCloud</a>
         {" =)"}
       </span>
     </div>

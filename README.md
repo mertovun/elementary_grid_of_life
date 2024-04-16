@@ -1,3 +1,9 @@
+# Elementary Grid of Life
+
+A simple [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) implementation into a beautiful step sequencer [elementary grid](https://github.com/teetow/elementary_grid). 
+________________
+
+_______
 # Elementary Grid
 
 ## A tonegrid synth made with Elementary Audio and React
