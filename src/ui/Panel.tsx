@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import Icons from "../assets/icons";
-import { encodeUrlParams, Patch } from "../lib/patch";
+import { encodeUrlParams, Lifetime, Patch } from "../lib/patch";
 import PlaybackContext from "../lib/PlaybackContext";
 import useAnimationFrame from "../lib/useAnimationFrame";
 import useClickAway from "../lib/useClickAway";
@@ -19,6 +19,7 @@ import { Logo } from "./Logo";
 import "./Panel.scss";
 import Scope from "./Scope";
 import BpmInput from "./BpmInput";
+import Picker from "./Picker";
 
 const cls = "eg-panel";
 
@@ -110,7 +111,7 @@ const Switch = ({
   );
 };
 
-type ToneName = "stab" | "ding";
+type ToneName = "stab" | "ding" | "bell";
 
 type Tone = {
   name: ToneName;
@@ -123,31 +124,36 @@ const tones = [
   { name: "bell", label: "Bell" },
 ] as Array<Tone>;
 
+
 type TonePickerProps = {
   currentTone: ToneName;
   onSetTone: (name: ToneName) => void;
 };
 
 const TonePicker = ({ currentTone, onSetTone }: TonePickerProps) => {
-  return (
-    <div className={`${cls}__tone-picker`}>
-      {tones.map((tone) => {
-        return (
-          <div className={`${cls}__option`} key={tone.name}>
-            <input
-              type="radio"
-              className={`${cls}__led`}
-              id={tone.name}
-              value={tone.name}
-              checked={tone.name === currentTone}
-              onChange={() => onSetTone(tone.name)}
-            />
-            <label htmlFor={tone.name}>{tone.label}</label>
-          </div>
-        );
-      })}
-    </div>
-  );
+  return <Picker items={tones} currentName={currentTone} onSet={onSetTone} />;
+};
+
+type LifeTimeOption = {
+  name: Lifetime;
+  label: string;
+};
+
+const lifeTimeOptions = [
+  { name: Lifetime.QUARTER, label: "1/4" },
+  { name: Lifetime.HALF, label: "2/4" },
+  { name: Lifetime.WHOLE, label: "4/4" },
+] as Array<LifeTimeOption>;
+
+
+type LifetimePickerProps = {
+  currentLifetime: Lifetime;
+  onSetLifetime: (lifetime: Lifetime) => void;
+};
+
+
+const LifetimePicker = ({ currentLifetime, onSetLifetime }: LifetimePickerProps) => {
+  return <Picker items={lifeTimeOptions} currentName={currentLifetime} onSet={onSetLifetime}/>;
 };
 
 type MeterProps = {
@@ -181,11 +187,13 @@ type Props = {
   onSetKick: (useKick: boolean) => void;
   onSetTone: (tone: string) => void;
   onSetMute: (mute: boolean) => void;
+  onSetLife: (life: boolean) => void;
+  onSetLifetime: (lifetime: Lifetime) => void;
 };
 
 const getUseFancyLayout = () => window.matchMedia("(min-width: 35.001em)").matches;
 
-function Panel({ patch, onClear, onSetKick, onSetTone, onSetMute }: Props) {
+function Panel({ patch, onClear, onSetKick, onSetTone, onSetMute, onSetLife, onSetLifetime }: Props) {
   const [skip, setSkip] = useState(1);
   const [fancyLayout, setFancyLayout] = useState<boolean>(getUseFancyLayout());
   const [showMeters, setShowMeters] = useState<boolean>(false);
@@ -234,9 +242,15 @@ function Panel({ patch, onClear, onSetKick, onSetTone, onSetMute }: Props) {
 
         <TonePicker currentTone={patch.tone as ToneName} onSetTone={onSetTone} />
 
-        <Switch label="Kick" active={patch.useKick} setActive={onSetKick} />
-
-        <Switch label="Mute" active={patch.mute || false} setActive={onSetMute} />
+        <div className={`${cls}__option`}>
+          <Switch label="Life" active={patch.life} setActive={onSetLife} />
+          <LifetimePicker currentLifetime={patch.lifetime} onSetLifetime={onSetLifetime} />
+        </div>
+        
+        <div>
+          <Switch label="Kick" active={patch.useKick} setActive={onSetKick} />
+          <Switch label="Mute" active={patch.mute || false} setActive={onSetMute} />
+        </div>
 
         {fancyLayout && <ShareWidget patch={patch} />}
       </div>

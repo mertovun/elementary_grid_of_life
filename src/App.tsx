@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useReducer } from "react";
 import {
+  Lifetime,
   Patch,
   clearUrlState,
   getLocalStorage,
@@ -17,6 +18,7 @@ import Splainer from "./ui/Splainer";
 import "./App.scss";
 import { BpmContext } from "./lib/PlaybackContext";
 import { core } from "./lib/webRenderer";
+import useLife from "./lib/useLife";
 
 const numTracks = 16;
 const numSteps = 16;
@@ -42,6 +44,8 @@ const getInitialPatch = () => {
     bassTracks: initTracks(7),
     tone: "stab",
     useKick: false,
+    life: false,
+    lifetime: Lifetime.QUARTER,
   } as Patch;
 
   const urlPatch = getUrlState();
@@ -73,6 +77,17 @@ const App = () => {
     withKick: patch.useKick,
     mute: patch.mute,
     bpm: bpm,
+  });
+
+  const handleLife = useCallback((field:any) => {
+    updatePatch({ type: "setTracks", tracks: field });
+  }, []);
+
+  useLife({
+    field: patch.tracks,
+    setField: handleLife,
+    life: patch.life,
+    lifetime: patch.lifetime,
   });
 
   const toggleNote = useCallback(
@@ -121,6 +136,14 @@ const App = () => {
           )}
           onSetMute={useCallback(
             (mute) => updatePatch({ type: "setMute", mute }),
+            [],
+          )}
+          onSetLife={useCallback(
+            (life) => updatePatch({ type: "setLife", life }),
+            [],
+          )}
+          onSetLifetime={useCallback(
+            (lifetime) => updatePatch({ type: "setLifetime", lifetime }),
             [],
           )}
         />
