@@ -2,7 +2,7 @@
 
 A simple [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life) implementation into a beautiful step sequencer [elementary grid](https://github.com/teetow/elementary_grid). 
 ________________
-Live Demo [here](https://mertovun.github.io/elementary_grid_of_life/?&kick=1&tone=ding&life=1&lifetime=quarter&bassTracks=0,0,0,4,4,8,8,16,0,2,0,0,0,0,0,0&tracks=----------AAJBAJBA--ABAIIAAB-ABAIIAAB-ABAIIAAB-AAJBAJBA).
+Live Demo [here](https://mertovun.github.io/elementary_grid_of_life/?&kick=1&tone=ding&life=1&lifetime=whole&bassTracks=0,0,0,4,4,8,8,16,0,2,0,0,0,0,0,0&tracks=ABAAAAAA-BBAAAAAA-IBAAAAAA----AAAAAAAJ-AAAAAAAJ-AAIJAAAA--AIAAIAAA-AIAAIAAA-AIAAIAAA--AAIJAAAA-).
 _______
 # Elementary Grid
 
